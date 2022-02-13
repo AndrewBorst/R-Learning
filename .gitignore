@@ -38,5 +38,6 @@ vignettes/*.pdf
 # R Environment Variables
 .Renviron
 /Public_Datasets/
+/GitIgnored_Config/
 *.xlsx
 *.pdf
