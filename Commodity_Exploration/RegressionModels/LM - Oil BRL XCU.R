@@ -20,7 +20,6 @@ startdate <-  "2010-09-01"
 
 wti <-  Quandl("CHRIS/CME_CL1", collapse = "week", start_date=startdate)
 wti$diff <-  c(wti$Settle[1:(nrow(wti)-1)] - wti$Settle[2:nrow(wti)],0)
-wti$group <-  "wti"
 #wtim = wtim[2:nrow(wtim),]
 wtimonth <-  Quandl("CHRIS/CME_CL1", collapse = "month", start_date=startdate)
 wtimonth$diff <-  c(wtimonth$Settle[1:(nrow(wtimonth)-1)] - wtimonth$Settle[2:nrow(wtimonth)],0)
@@ -29,7 +28,6 @@ wtiday$diff <-  c(wtiday$Settle[1:(nrow(wtiday)-1)] - wtiday$Settle[2:nrow(wtida
 
 copper  <-  Quandl("CHRIS/CME_HG1", collapse = "week", start_date=startdate)
 copper$diff  <-  c(copper$Settle[1:(nrow(copper)-1)] - copper$Settle[2:nrow(copper)],0)
-copper$group <-  "copusd"
 #copm = copm[2:nrow(copm),]
 coppermonth  <-  Quandl("CHRIS/CME_HG1", collapse = "month", start_date=startdate)
 coppermonth$diff  <-  c(coppermonth$Settle[1:(nrow(coppermonth)-1)] - coppermonth$Settle[2:nrow(coppermonth)],0)
@@ -47,6 +45,7 @@ cor(settlemonth$oil, settlemonth$copper)
 cor(settleweek$oil, settleweek$copper)
 cor(settleday$oil, settleday$copper)
 
+
 diffweek <- inner_join(wti, copper, by = "Date") %>% 
   select(Date, oil = diff.x, copper = diff.y) 
 diffmonth <- inner_join(wtimonth, coppermonth, by = "Date") %>% 
@@ -59,13 +58,14 @@ cor(diffweek$oil, diffweek$copper)
 cor(diffmonth$oil, diffmonth$copper)
 
 #Plot the data to look for multivariate outliers, non-linear relationships etc
-diffmonth %>% ggplot(aes(copper,oil)) +
+settleweek %>% ggplot(aes(copper,oil)) +
     geom_point() +
     geom_jitter() +
-    geom_smooth() +
+    geom_smooth() 
++
     facet_wrap(~year(Date))
 
-mnorm  <-  dday %>%  
+mnorm  <-  settleweek %>%  
   mutate(oilnorm = normalize(oil), coppernorm = normalize(copper)) 
 
 mnorm %>% 
