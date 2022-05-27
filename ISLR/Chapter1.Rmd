@@ -1,0 +1,76 @@
+---
+title: "Introduction to Statistical Learning -- Chapter 1"
+author: "Andy Borst"
+date: "5/19/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+This code reproduces figures in ISLR(Introduction to Statistical Learning) Chapter 1. For those who pick up this book without the benefit of prior experience in R, I believe reviewing my code is useful. The book uses mostly base R packages whereas many R programmers have moved to using the Tidy patterns (see [https://r4ds.had.co.nz/](R for Data Science)). I will add a post for each chapter as I work my way through the book. 
+
+So assuming that the reader has R/RStudio and the tidyverse package installed, we can install ISLR2 that is provided by the authors which has different datasets that are used in the examples throughout the book. 
+
+```{r libraries}
+if(!(rlang::is_installed('ISLR2')))
+{
+  install.packages('ISLR2')
+}
+
+library(ISLR2)
+library(tidyverse)
+
+# library(help = 'ISLR2')
+```
+
+## Figure 1a
+In the first panel of Figure 1, the graph is the set of points (Wage vs Age) and with an added smooth curve. The authors may have used the default method for the geom_smooth function and turned off the confidence interval ([https://ggplot2.tidyverse.org/reference/geom_smooth.html](link). The code below pipes the Wage data into a plot. As a lark, I decided to add the most common methods with different colors. The gam and loess methods produced very similar curves for this data and you can see the addition of a linear method (lm) added a less informative line since wages do tail off after the age of 60. Notice how easy it is to layer different graphics onto the same visualization.     
+
+
+```{r}
+Wage %>% ggplot(aes(x=age, y=wage)) +
+  geom_point(colour="grey") +
+  geom_smooth(method = "gam", color="red", fill="red") +
+  geom_smooth(method = "loess", color="yellow", fill="yellow") +
+  geom_smooth(method = "lm", color="blue", se=FALSE) +
+  labs(x = "Age", y = "Wage")
+
+```
+
+## Figure 1b
+Reproduction of the second panel (Wage vs Year) was unexpectedly tricky. To include x-axis ticks at each year and also exclude some year labels required hard-coding the breaks and labels using the scale_x_continuous function.  
+
+```{r}
+Wage %>% ggplot(aes(x=year, y=wage)) +
+  geom_point(colour="grey") +
+  geom_smooth(method = "lm", se=FALSE) +
+  scale_x_continuous(breaks = c(2003,2004,2005,2006,2007,2008,2009),
+                     labels = c("2003"="2003", "2004"="", "2005"="","2006"="2006", 
+                                "2007" ="", "2008"="", "2009"="2009")) +
+  labs(x = "Year", y = "Wage") 
+
+```
+
+## Figure 1c 
+With reproducing third panel, I noticed more details about the plots and this box plot is almost identical to the one in the book. The y-axis tick interval, the white background with no grid lines, and panel border are all reproduced. I couldn't find the exact palette used but the "Dark2" brewer palette is fairly close.  
+
+```{r}
+Wage %>% ggplot(aes(x=education, y=wage, fill=education)) +
+  stat_boxplot(geom = "errorbar", width=0.3) +
+  geom_boxplot() +
+  scale_fill_brewer(palette = "Dark2") +
+  scale_x_discrete(labels=c(1, 2, 3, 4, 5)) +
+  scale_y_continuous(breaks=c(50,100,200, 300)) +
+  theme(legend.position = "none",
+        panel.background = element_rect(fill = "white", colour = "azure4"),
+        plot.background = element_rect(fill = "white"),
+        panel.grid.major = element_line(linetype = "blank"),
+        panel.grid.minor = element_line(linetype = "blank")) + 
+  labs(x="Education Level", y="Wage") 
+
+```
+
